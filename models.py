@@ -16,7 +16,6 @@ from sqlalchemy import (
     Column, String, Integer, Float, Boolean,
     DateTime, ForeignKey, Text, Enum
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from database import Base
 
