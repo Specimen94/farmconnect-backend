@@ -28,14 +28,21 @@ from auth import (
 from database import engine, get_db
 import models as m
 
-# Create all tables on startup (safe to run multiple times — skips existing tables)
-models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title="FarmConnect API",
     description="Backend for the FarmConnect agricultural marketplace",
     version="1.0.0",
 )
+
+@app.on_event("startup")
+async def startup_event():
+    """Runs once when the server starts. Creates any missing DB tables."""
+    try:
+        models.Base.metadata.create_all(bind=engine)
+        print("✅ Database tables created/verified successfully")
+    except Exception as e:
+        print(f"⚠️  Database startup error: {e}")
+
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 # Allows your Vercel frontend to call this API.
@@ -57,7 +64,7 @@ app.add_middleware(
 # ── HELPERS ───────────────────────────────────────────────────────────────────
 def format_date(dt: datetime) -> str:
     """Convert a datetime to the display format the frontend expects."""
-    return dt.strftime("%-d %b %Y")   # e.g. "15 Feb 2026"
+    return dt.strftime("%d %b %Y").lstrip("0")   # e.g. "15 Feb 2026"
 
 
 def order_id() -> str:
